@@ -1,0 +1,36 @@
+name: Extract Project
+
+on:
+  workflow_dispatch:
+
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract archive and flatten root folder
+        run: |
+          mkdir extracted
+
+          # فك الضغط
+          tar -xzf to-best-flutter.tar.gz -C extracted
+
+          # لو فيه فولدر واحد جوه extracted (زي to-best)
+          ROOT=$(find extracted -mindepth 1 -maxdepth 1 -type d | head -n 1)
+
+          if [ -n "$ROOT" ]; then
+            shopt -s dotglob
+            mv "$ROOT"/* .
+            rm -rf extracted
+          else
+            shopt -s dotglob
+            mv extracted/* .
+            rm -rf extracted
+          fi
+
+      - name: Show final structure
+        run: |
+          ls -la
