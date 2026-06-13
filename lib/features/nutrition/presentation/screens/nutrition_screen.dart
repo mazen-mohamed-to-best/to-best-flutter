@@ -151,7 +151,10 @@ class _NutritionScreenState extends ConsumerState<NutritionScreen> {
   }
 
   Widget _macroCard(String label, double current, double target, Color color, AppLocalizations loc) {
-    final pct = (target > 0 ? current / target : 0).clamp(0.0, 1.0);
+    final double pct =
+    ((target > 0 ? current / target : 0.0)
+        .clamp(0.0, 1.0))
+    .toDouble();
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
