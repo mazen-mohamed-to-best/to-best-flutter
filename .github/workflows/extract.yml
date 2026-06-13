@@ -11,29 +11,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract archive and flatten root folder
+      - name: Extract archive
         run: |
           set -e
-
           mkdir -p extracted
           tar -xzf to-best-flutter.tar.gz -C extracted
 
+      - name: Flatten project into repo root
+        run: |
+          set -e
+
           ROOT=$(find extracted -mindepth 1 -maxdepth 1 -type d | head -n 1)
 
-          if [ -n "$ROOT" ]; then
-            shopt -s dotglob nullglob
-            mv "$ROOT"/* .
-            mv "$ROOT"/.[!.]* . 2>/dev/null || true
-            mv "$ROOT"/..?* . 2>/dev/null || true
-            rm -rf extracted
-          else
-            shopt -s dotglob nullglob
-            mv extracted/* .
-            mv extracted/.[!.]* . 2>/dev/null || true
-            mv extracted/..?* . 2>/dev/null || true
-            rm -rf extracted
+          if [ -z "$ROOT" ]; then
+            ROOT="extracted"
           fi
 
+          shopt -s dotglob nullglob
+
+          for item in "$ROOT"/* "$ROOT"/.[!.]* "$ROOT"/..?*; do
+            [ -e "$item" ] || continue
+
+            base=$(basename "$item")
+
+            # تجاهل .github حتى لا يتعارض مع workflow الحالي
+            if [ "$base" = ".github" ]; then
+              continue
+            fi
+
+            mv "$item" .
+          done
+
+          rm -rf extracted
+
       - name: Show final structure
-        run: |
-          ls -la
+        run: ls -la
