@@ -13,21 +13,24 @@ jobs:
 
       - name: Extract archive and flatten root folder
         run: |
-          mkdir extracted
+          set -e
 
-          # فك الضغط
+          mkdir -p extracted
           tar -xzf to-best-flutter.tar.gz -C extracted
 
-          # لو فيه فولدر واحد جوه extracted (زي to-best)
           ROOT=$(find extracted -mindepth 1 -maxdepth 1 -type d | head -n 1)
 
           if [ -n "$ROOT" ]; then
-            shopt -s dotglob
+            shopt -s dotglob nullglob
             mv "$ROOT"/* .
+            mv "$ROOT"/.[!.]* . 2>/dev/null || true
+            mv "$ROOT"/..?* . 2>/dev/null || true
             rm -rf extracted
           else
-            shopt -s dotglob
+            shopt -s dotglob nullglob
             mv extracted/* .
+            mv extracted/.[!.]* . 2>/dev/null || true
+            mv extracted/..?* . 2>/dev/null || true
             rm -rf extracted
           fi
 
